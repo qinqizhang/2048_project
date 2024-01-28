@@ -21,6 +21,7 @@ class Game(tk.Frame):
         self.main_grid.grid(pady=(100,0))
         self.make_GUI()
         self.start_game()
+        #set the move keyboard
         self.master.bind("a", self.left)
         self.master.bind("d", self.right)
         self.master.bind("w", self.up)
@@ -28,12 +29,13 @@ class Game(tk.Frame):
         self.mainloop()
     def make_GUI(self):
         '''
-        Design the UI and set the original frame. There are cell frame and score frame.
+        function to design the UI and set the original frame. There are cell frame and score frame.
         '''        
         self.cells=[]
         for i in range(4):
             row=[]
             for j in range(4):
+                #set the cell frame, data, and number
                 cell_frame = tk.Frame(
                     self.main_grid,
                     bg='white',
@@ -46,6 +48,7 @@ class Game(tk.Frame):
                 cell_data = {"frame":cell_frame,"number":cell_number}
                 row.append(cell_data)
             self.cells.append(row)
+        #set the score frame, and label
         score_frame = tk.Frame(self)
         score_frame.place(relx=0.5,y=45,anchor="center")
         tk.Label(
@@ -57,11 +60,12 @@ class Game(tk.Frame):
 
     def start_game(self):
         '''
-        Start game with the matrix and cells. Initially there would be 2 random cells with a number 2 in it.
+        function to start game with the matrix and cells. Initially there would be 2 random cells with a number 2 in it.
         '''  
         self.matrix = []
         for i in range(4):
             self.matrix.append([0]*4)
+        #uss random to choose the initial cell 
         row = random.randint(0,3)
         col = random.randint(0,3)
         self.matrix[row][col] = 2
@@ -91,7 +95,7 @@ class Game(tk.Frame):
         new_matrix = []
         for i in range(4):
             new_matrix.append([0]*4)
-        
+        #move the grid and initially move left
         for i in range(4):
             position = 0
             for j in range(4):
@@ -150,6 +154,7 @@ class Game(tk.Frame):
         for i in range(4):
             for j in range(4):
                 cell_value = self.matrix[i][j]
+                #update the cell value with 0 and non-zero
                 if cell_value==0:
                     self.cells[i][j]["frame"].configure(bg='white')
                     self.cells[i][j]["number"].configure(bg='white',text="")
@@ -297,6 +302,7 @@ class Game(tk.Frame):
                 fg="white",
                 font=("Helvetica", 55, "bold")
             ).pack()
+        #if there is no 0 cell and no move in horizontal and vertical,game will end
         elif not any(0 in row for row in self.matrix) and not self.horizontal_move_exists() and not self.vertical_move_exists():
             game_over_frame = tk.Frame(self.main_grid, borderwidth=2)
             game_over_frame.place(relx=0.5, rely=0.5, anchor='center')
