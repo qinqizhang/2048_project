@@ -19,7 +19,7 @@ class Game(tk.Frame):
         self.master.title("2048")
         self.main_grid = tk.Frame(self, bg='lightgrey', bd=3, width=400,height=400)
         self.main_grid.grid(pady=(100,0))
-        self.make_GUI()
+        self.UI_set()
         self.start_game()
         #set the move keyboard
         self.master.bind("a", self.left)
@@ -27,7 +27,7 @@ class Game(tk.Frame):
         self.master.bind("w", self.up)
         self.master.bind("s", self.down)
         self.mainloop()
-    def make_GUI(self):
+    def UI_set(self):
         '''
         function to design the UI and set the original frame. There are cell frame and score frame.
         '''        
@@ -57,7 +57,26 @@ class Game(tk.Frame):
         ).grid(row=0)
         self.score_label = tk.Label(score_frame,text = "0")
         self.score_label.grid(row=1)
-
+    def update_UI(self):
+        '''
+        function to update the UI with the new matrix
+        '''
+        for i in range(4):
+            for j in range(4):
+                cell_value = self.matrix[i][j]
+                #update the cell value with 0 and non-zero
+                if cell_value==0:
+                    self.cells[i][j]["frame"].configure(bg='white')
+                    self.cells[i][j]["number"].configure(bg='white',text="")
+                else:
+                    self.cells[i][j]["frame"].configure(bg='orange')
+                    self.cells[i][j]["number"].configure(
+                        bg='orange',
+                        fg="white",
+                        font=("Helvetica", 55, "bold"),
+                        text=str(cell_value))
+        self.score_label.configure(text = self.score)
+        self.update_idletasks()
     def start_game(self):
         '''
         function to start game with the matrix and cells. Initially there would be 2 random cells with a number 2 in it.
@@ -104,7 +123,7 @@ class Game(tk.Frame):
                     position+=1
         self.matrix = new_matrix
     
-    def combine(self):
+    def merge(self):
         '''
         function to merge the cells in matrix after compressing
         '''
@@ -124,7 +143,6 @@ class Game(tk.Frame):
             for j in range(4):
                 new_matrix[i].append(self.matrix[i][3-j])
         self.matrix = new_matrix
-
     def transpose(self):
         '''
         function to get the transpose of matrix means interchanging rows and column
@@ -146,28 +164,6 @@ class Game(tk.Frame):
                 row = random.randint(0,3)
                 col = random.randint(0,3)
             self.matrix[row][col] = 2 
-        
-    def update_GUI(self):
-        '''
-        function to update the UI with the new matrix
-        '''
-        for i in range(4):
-            for j in range(4):
-                cell_value = self.matrix[i][j]
-                #update the cell value with 0 and non-zero
-                if cell_value==0:
-                    self.cells[i][j]["frame"].configure(bg='white')
-                    self.cells[i][j]["number"].configure(bg='white',text="")
-                else:
-                    self.cells[i][j]["frame"].configure(bg='orange')
-                    self.cells[i][j]["number"].configure(
-                        bg='orange',
-                        fg="white",
-                        font=("Helvetica", 55, "bold"),
-                        text=str(cell_value))
-        self.score_label.configure(text = self.score)
-        self.update_idletasks()
-
     def left(self,event):
         '''
         function to move left and check if the input is valid, and update the UI with the new matrix
@@ -177,7 +173,7 @@ class Game(tk.Frame):
             matrix_before = [row[:] for row in self.matrix]
             # Perform the stack operation
             self.stack()
-            self.combine()
+            self.merge()
             self.stack()
             # Check if the matrix has changed after those operations
             if self.matrix == matrix_before:
@@ -185,13 +181,11 @@ class Game(tk.Frame):
 
             # Continue with the rest of the operations if there is a change
             self.add_new()
-            self.update_GUI()
+            self.update_UI()
             self.game_over()
         except NoChangeException:
             # Handle the case when there is no change in the matrix
             print("invalid input")
-
-
     def right(self,event):
         '''
         function to move right and check if the input is valid, and update the UI with the new matrix
@@ -202,7 +196,7 @@ class Game(tk.Frame):
             # Perform the stack operation
             self.reverse()
             self.stack()
-            self.combine()
+            self.merge()
             self.stack()
             self.reverse()
             # Check if the matrix has changed after those operations
@@ -211,12 +205,11 @@ class Game(tk.Frame):
             # Continue with the rest of the operations if there is a change
             
             self.add_new()
-            self.update_GUI()
+            self.update_UI()
             self.game_over()
         except NoChangeException:
             # Handle the case when there is no change in the matrix
-            print("invalid input")
-    
+            print("invalid input")  
     def up(self,event):
         '''
         function to move up and check if the input is valid, and update the UI with the new matrix
@@ -227,7 +220,7 @@ class Game(tk.Frame):
             # Perform the stack operation
             self.transpose()
             self.stack()
-            self.combine()
+            self.merge()
             self.stack()
             self.transpose()
             # Check if the matrix has changed after those operations
@@ -236,12 +229,11 @@ class Game(tk.Frame):
             # Continue with the rest of the operations if there is a change
             
             self.add_new()
-            self.update_GUI()
+            self.update_UI()
             self.game_over()
         except NoChangeException:
             # Handle the case when there is no change in the matrix
             print("invalid input")
-    
     def down(self,event):
         '''
         function to move down and check if the input is valid, and update the UI with the new matrix
@@ -253,7 +245,7 @@ class Game(tk.Frame):
             self.transpose()
             self.reverse()        
             self.stack()
-            self.combine()
+            self.merge()
             self.stack()
             self.reverse()
             self.transpose()
@@ -263,29 +255,27 @@ class Game(tk.Frame):
             # Continue with the rest of the operations if there is a change
             
             self.add_new()
-            self.update_GUI()
+            self.update_UI()
             self.game_over()
         except NoChangeException:
             # Handle the case when there is no change in the matrix
             print("invalid input")
-
-    def horizontal_move_exists(self):
-        '''
-        function to check if there is any possible move in horizontal area.
-        '''
-        for i in range(4):
-            for j in range(3):
-                if self.matrix[i][j] == self.matrix[i][j+1]:
-                    return True
-        return False
-
-    def vertical_move_exists(self):
+    def vertical_check(self):
         '''
         function to check if there is any possible move in vertical area.
         '''
         for i in range(3):
             for j in range(4):
                 if self.matrix[i][j] == self.matrix[i+1][j]:
+                    return True
+        return False    
+    def horizontal_check(self):
+        '''
+        function to check if there is any possible move in horizontal area.
+        '''
+        for i in range(4):
+            for j in range(3):
+                if self.matrix[i][j] == self.matrix[i][j+1]:
                     return True
         return False
     def game_over(self):
@@ -303,7 +293,7 @@ class Game(tk.Frame):
                 font=("Helvetica", 55, "bold")
             ).pack()
         #if there is no 0 cell and no move in horizontal and vertical,game will end
-        elif not any(0 in row for row in self.matrix) and not self.horizontal_move_exists() and not self.vertical_move_exists():
+        elif not any(0 in row for row in self.matrix) and not self.horizontal_check() and not self.vertical_check():
             game_over_frame = tk.Frame(self.main_grid, borderwidth=2)
             game_over_frame.place(relx=0.5, rely=0.5, anchor='center')
             tk.Label(
